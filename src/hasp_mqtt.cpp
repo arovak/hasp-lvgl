@@ -25,6 +25,8 @@ WiFiSpiClient mqttNetworkClient;
 #if defined(W5500_MOSI) && defined(W5500_MISO) && defined(W5500_SCLK)
 #define W5500_LAN
 #include <Ethernet.h>
+#elif USE_UIP_ETHERNET > 0
+#include <UIPEthernet.h> 
 #else
 #include <STM32Ethernet.h>
 #endif

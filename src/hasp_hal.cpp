@@ -255,6 +255,14 @@ String halGetMacAddress(int start, const char * seperator)
 #if USE_BUILTIN_ETHERNET > 0
     mac_p = Ethernet.MACAddress();
     for(uint8_t i = 0; i < 6; i++) mac[i] = *(mac_p + i);
+#elif USE_UIP_ETHERNET > 0
+    uint32_t baseUID = (uint32_t)UID_BASE;
+    mac[0]           = 0x00;
+    mac[1]           = 0x80;
+    mac[2]           = 0xE1;
+    mac[3]           = (baseUID & 0x00FF0000) >> 16;
+    mac[4]           = (baseUID & 0x0000FF00) >> 8;
+    mac[5]           = (baseUID & 0x000000FF);
 #else
     Ethernet.macAddress(mac);
 #endif

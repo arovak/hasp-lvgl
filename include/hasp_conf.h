@@ -115,9 +115,11 @@
 #include <LwIP.h>
 #include <STM32Ethernet.h>
 #warning Use built-in STM32 Ethernet
-#elif USE_UIP_ETHERNET
+#elif USE_UIP_ETHERNET > 0
+// #define ENC28J60_USE_SPILIB
+#define ENC28J60_CONTROL_CS UIP_CS
 #include <UIPEthernet.h>
-#include <utility/logging.h>
+// #include <utility/logging.h>
 #warning Use ENC28J60 Ethernet shield
 #else
 #include "Ethernet.h"

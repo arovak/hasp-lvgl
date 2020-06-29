@@ -184,8 +184,8 @@ void gpioSetup()
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
-    gpioConfig[0] = {D2, 0, HASP_GPIO_SWITCH, INPUT};
-    gpioConfig[1] = {D1, 1, HASP_GPIO_RELAY, OUTPUT};
+    // gpioConfig[0] = {D2, 0, HASP_GPIO_SWITCH, INPUT};
+    // gpioConfig[1] = {D1, 1, HASP_GPIO_RELAY, OUTPUT};
 
 // gpioAddButton(D2, INPUT, HIGH, 1);
 // pinMode(D1, OUTPUT);

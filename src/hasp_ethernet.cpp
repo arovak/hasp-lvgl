@@ -22,7 +22,31 @@ void ethernetSetup()
     }
 
     Log.notice(F("ETH: MAC Address %s"), halGetMacAddress(0, ":"));
+#elif USE_UIP_ETHERNET > 0
 
+    pinMode(UIP_RST, OUTPUT);
+    digitalWrite(UIP_RST, LOW);
+    delay(50);
+    digitalWrite(UIP_RST, HIGH);
+
+    byte mac[6];
+    uint32_t baseUID = (uint32_t)UID_BASE;
+    mac[0]           = 0x00;
+    mac[1]           = 0x80;
+    mac[2]           = 0xE1;
+    mac[3]           = (baseUID & 0x00FF0000) >> 16;
+    mac[4]           = (baseUID & 0x0000FF00) >> 8;
+    mac[5]           = (baseUID & 0x000000FF);
+    
+    Log.notice(F("ETH: Begin Ethernet ENC28J60"));
+    if(Ethernet.begin(mac) == 0) {
+        Log.notice(F("ETH: Failed to configure Ethernet using DHCP"));
+    } else {
+        ip = Ethernet.localIP();
+        Log.notice(F("ETH: DHCP Success got IP %d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
+    }
+
+    Log.notice(F("ETH: MAC Address %s"), halGetMacAddress(0, ":"));
 #else
     byte mac[6];
     uint32_t baseUID = (uint32_t)UID_BASE;
@@ -84,7 +108,7 @@ void ethernetLoop(void)
 bool ethernetEvery5Seconds()
 {
     bool state;
-#if USE_BUILTIN_ETHERNET > 0
+#if USE_BUILTIN_ETHERNET > 0 || USE_UIP_ETHERNET > 0
     state = Ethernet.linkStatus() == LinkON;
 #else
     state = Ethernet.link() == 1;
