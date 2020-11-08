@@ -196,7 +196,7 @@ void dispatchBacklight(String strPayload)
 void dispatchCommand(String cmnd)
 {
     Log.verbose(F(LOG_CMND_CTR "%s"), cmnd.c_str());
-    char command[20], payload[128];
+    char command[40], payload[128];
     memset(command, 0 ,sizeof(command));
     memset(payload, 0 ,sizeof(payload));
     char* obj;
@@ -204,35 +204,43 @@ void dispatchCommand(String cmnd)
     if (obj != NULL) {
         Log.verbose(F(LOG_CMND_CTR "obj > %s %u"), obj , (unsigned)strlen(obj));
         sscanf(cmnd.c_str(),"%[^=]=%[^=]",command, payload);
-        Log.verbose(F(LOG_CMND_CTR "%s[%s]"), command, payload);
+        Log.verbose(F(LOG_CMND_CTR "obj %s[%s]"), command, payload);
         dispatchAttribute(command, payload);
     } else {
         sscanf(cmnd.c_str(),"%s %s",command, payload);
-        Log.verbose(F(LOG_CMND_CTR "%s[%s]"), command, payload);
-        if(!strcmp(command, PSTR("page"))) {
+        Log.verbose(F(LOG_CMND_CTR "cmd %s[%s]"), command, payload);
+        if(!strcmp_P(command, PSTR("page"))) {
             dispatchAttribute(command, payload);       
         } else
-        if(!strcmp(command, PSTR("calibrate"))) {
+        if(!strcmp_P(command, PSTR("calibrate"))) {
             guiCalibrate();
         }else
-        if(!strcmp(command, PSTR("wakeup"))) {
+        if(!strcmp_P(command, PSTR("wakeup"))) {
             haspWakeUp();
         }else
-        if(!strcmp(command, PSTR("screenshot"))) {
+        if(!strcmp_P(command, PSTR("screenshot"))) {
             // guiTakeScreenshot("/screenhot.bmp");
         } else
-        if(!strcmp(command, PSTR("statusupdate"))) {
+        if(!strcmp_P(command, PSTR("statusupdate"))) {
             dispatchStatusUpdate();
         } else
-        if(!strcmp(command, PSTR("restart"))) {
+        if(!strcmp_P(command, PSTR("restart"))) {
             dispatchReboot(true);
         } else
-        if(!strcmp(command, PSTR(F_CONFIG_SSID)) || !strcmp(command, PSTR(F_CONFIG_PASS))) {
-            DynamicJsonDocument settings(256);
+        if(!strcmp_P(command, F_CONFIG_SSID) || !strcmp_P(command, F_CONFIG_PASS)) {
+            DynamicJsonDocument settings(45);
             settings[command] = payload;
             wifiSetConfig(settings.as<JsonObject>());
+        } else
+        if(!strcmp_P(command, PSTR("mqtthost")) || !strcmp_P(command, PSTR("mqttport")) || !strcmp_P(command, PSTR("mqttuser")) || !strcmp_P(command, PSTR("mqttpass"))) {
+            char item[5];
+            memset(item, 0 ,sizeof(item));
+            strncpy(item, command+4, 4);
+            DynamicJsonDocument settings(45);
+            settings[item] = payload;
+            mqttSetConfig(settings.as<JsonObject>());
         } else {
-            Log.verbose(F(LOG_CMND_CTR "Command not found %s[%s]"), command, payload);
+            Log.error(F(LOG_CMND_CTR "Command not found %s[%s]"), command, payload);
         }
     }
 }
