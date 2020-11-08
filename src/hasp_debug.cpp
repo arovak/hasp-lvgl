@@ -396,7 +396,7 @@ void debugLoop()
             serialInputIndex = 0;
         } else {
             if(serialInputIndex < sizeof(serialInputBuffer) - 1) {
-                serialInputBuffer[serialInputIndex++] = ch;
+                serialInputBuffer[serialInputIndex++] = tolower(ch);
             }
             serialInputBuffer[serialInputIndex] = 0;
             if(strcmp(serialInputBuffer, "jsonl=") == 0) {

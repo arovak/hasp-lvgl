@@ -195,38 +195,44 @@ void dispatchBacklight(String strPayload)
 
 void dispatchCommand(String cmnd)
 {
-    dispatchPrintln(F("CMND"), cmnd);
-
-    if(cmnd.startsWith(F("page "))) {
-        cmnd = cmnd.substring(5, cmnd.length());
-        String strTopic((char *)0);
-        strTopic.reserve(128);
-        strTopic = F("page");
-        dispatchAttribute(strTopic, cmnd.c_str());
-    } else if(cmnd == F("calibrate")) {
-        guiCalibrate();
-    } else if(cmnd == F("wakeup")) {
-        haspWakeUp();
-    } else if(cmnd == F("screenshot")) {
-        // guiTakeScreenshot("/screenhot.bmp");
-    } else if(cmnd == F("") || cmnd == F("statusupdate")) {
-        dispatchStatusUpdate();
+    Log.verbose(F(LOG_CMND_CTR "%s"), cmnd.c_str());
+    char command[20], payload[128];
+    memset(command, 0 ,sizeof(command));
+    memset(payload, 0 ,sizeof(payload));
+    char* obj;
+    obj = strstr (cmnd.c_str(), ".b[");
+    if (obj != NULL) {
+        Log.verbose(F(LOG_CMND_CTR "obj > %s %u"), obj , (unsigned)strlen(obj));
+        sscanf(cmnd.c_str(),"%[^=]=%[^=]",command, payload);
+        Log.verbose(F(LOG_CMND_CTR "%s[%s]"), command, payload);
+        dispatchAttribute(command, payload);
     } else {
-
-        int pos = cmnd.indexOf("=");
-        if(pos > 0) {
-            String strTopic((char *)0);
-            String strPayload((char *)0);
-
-            strTopic.reserve(128);
-            strPayload.reserve(128);
-
-            strTopic   = cmnd.substring(0, pos);
-            strPayload = cmnd.substring(pos + 1, cmnd.length());
-
-            dispatchAttribute(strTopic, strPayload.c_str());
+        sscanf(cmnd.c_str(),"%s %s",command, payload);
+        Log.verbose(F(LOG_CMND_CTR "%s[%s]"), command, payload);
+        if(!strcmp(command, PSTR("page"))) {
+            dispatchAttribute(command, payload);       
+        } else
+        if(!strcmp(command, PSTR("calibrate"))) {
+            guiCalibrate();
+        }else
+        if(!strcmp(command, PSTR("wakeup"))) {
+            haspWakeUp();
+        }else
+        if(!strcmp(command, PSTR("screenshot"))) {
+            // guiTakeScreenshot("/screenhot.bmp");
+        } else
+        if(!strcmp(command, PSTR("statusupdate"))) {
+            dispatchStatusUpdate();
+        } else
+        if(!strcmp(command, PSTR("restart"))) {
+            dispatchReboot(true);
+        } else
+        if(!strcmp(command, PSTR(F_CONFIG_SSID)) || !strcmp(command, PSTR(F_CONFIG_PASS))) {
+            DynamicJsonDocument settings(256);
+            settings[command] = payload;
+            wifiSetConfig(settings.as<JsonObject>());
         } else {
-            dispatchAttribute(cmnd, "");
+            Log.verbose(F(LOG_CMND_CTR "Command not found %s[%s]"), command, payload);
         }
     }
 }

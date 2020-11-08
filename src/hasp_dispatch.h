@@ -28,4 +28,6 @@ void dispatch_button(uint8_t id, const char * event);
 
 void IRAM_ATTR dispatch_obj_attribute_str(uint8_t pageid, uint8_t btnid, const char * attribute, const char * data);
 
+#define LOG_CMND_CTR "CMND: "
+
 #endif
